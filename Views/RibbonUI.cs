@@ -25,7 +25,7 @@ namespace ConfortAnalysis.Views
             string assemblyPath = Assembly.GetExecutingAssembly().Location;
 
             // 4) Botões principais
-            AddPushButton(panel, "SelectFaces",    "Select Faces",    assemblyPath, "Commands.SelectFacesUtils.SelectFacesCommand",   "Resources/icons/select.png");
+            AddPushButton(panel, "SelectFaces",    "Select Faces",    assemblyPath, "Commands.SelectionUtils.SelectFacesCommand",   "Resources/icons/select.png");
             AddSplitButtonsForCollection(panel,
                                          "Faces",
                                          "FaceIds",
