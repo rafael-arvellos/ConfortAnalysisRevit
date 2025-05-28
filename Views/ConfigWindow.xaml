@@ -1,0 +1,73 @@
+<Window x:Class="ConfortAnalysis.Views.ConfigWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Configurações Sunpath"
+        SizeToContent="WidthAndHeight"
+        WindowStartupLocation="CenterScreen">
+
+<Grid Background="{DynamicResource Theme_BackgroundBrush}">
+
+    <!-- Additional UI Elements -->
+    <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center" Width="240" Margin="20">
+      <TextBlock Text="Configurações" FontSize="24" FontWeight="SemiBold" Margin="8" TextAlignment="Center" Foreground="{DynamicResource Theme_AccentBrush}" />
+      
+      <!-- EPW --> 
+      <TextBlock Text="Arquivo EPW" Margin="0,8,0,4" TextAlignment="Center" FontSize="16" />
+      <Button x:Name="EPWButton" Content="Buscar..." Width="160" Margin="0,4,0,8" />
+
+      <!-- Período de Análise -->    
+      <StackPanel x:Name="CustomPeriodPanel" Visibility="Collapsed" Margin="8">
+        <TextBlock Text="Período de Análise" Margin="0,0,0,4" TextAlignment="Center" FontSize="16" />
+        <ComboBox x:Name="PeriodComboBox" Width="160" Margin="0,4,0,0" HorizontalContentAlignment="Center">
+            <ComboBoxItem Content="Verão" />
+            <ComboBoxItem Content="Outono" />
+            <ComboBoxItem Content="Inverno" />
+            <ComboBoxItem Content="Primavera" />
+        </ComboBox>
+      </StackPanel>
+
+      <!-- Datas personalizadas -->
+      <StackPanel x:Name="CustomDatePanel" Visibility="Collapsed" Margin="8">
+        <TextBlock Text="Data de Início" Margin="0,0,0,4" FontSize="16" TextAlignment="Center"/>
+        <DatePicker x:Name="StartDatePicker" Width="160" Margin="4"/>
+        <TextBlock Text="Data de Fim" Margin="0,6,0,4" FontSize="16" TextAlignment="Center"/>
+        <DatePicker x:Name="EndDatePicker" Width="160" Margin="0,4,0,0"/>
+      </StackPanel>
+      
+      <!-- Resolução de malha -->
+      <StackPanel x:Name="CustomMeshPanel" Visibility="Collapsed" Margin="8">
+        <TextBlock Text="Resolução de malha" Margin="0,0,0,4" TextAlignment="Center" FontSize="16" />
+        <ComboBox x:Name="MeshComboBox" Width="160" Margin="0,4,0,0" HorizontalContentAlignment="Center">
+          <ComboBoxItem Content="Baixa" />
+          <ComboBoxItem Content="Média" />
+          <ComboBoxItem Content="Alta" />
+        </ComboBox>
+      </StackPanel>
+
+      <!-- Input Espaçamento de Hash -->
+      <StackPanel x:Name="CustomCellSizePanel" Visibility="Collapsed" Margin="8">
+        <TextBlock Text="Tamanho das células" Margin="0,0,0,4" FontSize="16" TextAlignment="Center"/>
+        <TextBlock Name="CustomCellSizeInput" Margin="0,4,0,0" Width="160" FontSize="14"/>
+      </StackPanel>
+
+      <!-- Input Distancia entre pontos -->
+      <StackPanel x:Name="CustomStepPanel" Visibility="Collapsed" Margin="8">
+        <TextBlock Text="Distancia entre pontos" Margin="0,0,0,4" FontSize="16" TextAlignment="Center"/>
+        <TextBlock Name="CustomStepInput" Margin="0,4,0,0" Width="160" FontSize="14"/>
+      </StackPanel>
+
+      <!-- Input Tolerância geométrica -->
+      <StackPanel x:Name="CustomTolerencePanel" Visibility="Collapsed" Margin="8">
+        <TextBlock Text="Tolerância geométrica" Margin="0,0,0,4" FontSize="16" TextAlignment="Center"/>
+        <TextBlock Name="CustomTolerenceInput" Margin="0,4,0,0" Width="160" FontSize="14"/>
+      </StackPanel>
+
+      <!-- Advanced Configurations Toggle Button -->
+      <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,12,0,0">
+        <TextBlock Text="Configurações Avançadas" Width="120" VerticalAlignment="Center" Margin="0,0,10,0" FontSize="16" TextWrapping="Wrap" />
+        <ToggleButton x:Name="AdvancedConfigToggle" Margin="10,0,0,0" Width="48" Height="24" />
+      </StackPanel>
+
+    </StackPanel>
+  </Grid>
+</Window>

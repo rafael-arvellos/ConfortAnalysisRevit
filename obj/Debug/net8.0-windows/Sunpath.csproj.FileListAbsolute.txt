@@ -1,0 +1,16 @@
+D:\Projetos\coding\Sunpath\bin\Debug\net8.0-windows\Sunpath.deps.json
+D:\Projetos\coding\Sunpath\bin\Debug\net8.0-windows\Sunpath.dll
+D:\Projetos\coding\Sunpath\bin\Debug\net8.0-windows\Sunpath.pdb
+D:\Projetos\coding\Sunpath\obj\Debug\net8.0-windows\Sunpath.csproj.AssemblyReference.cache
+D:\Projetos\coding\Sunpath\obj\Debug\net8.0-windows\Views\ConfigWindow.baml
+D:\Projetos\coding\Sunpath\obj\Debug\net8.0-windows\Views\ConfigWindow.g.cs
+D:\Projetos\coding\Sunpath\obj\Debug\net8.0-windows\Sunpath_MarkupCompile.cache
+D:\Projetos\coding\Sunpath\obj\Debug\net8.0-windows\Sunpath.g.resources
+D:\Projetos\coding\Sunpath\obj\Debug\net8.0-windows\Sunpath.GeneratedMSBuildEditorConfig.editorconfig
+D:\Projetos\coding\Sunpath\obj\Debug\net8.0-windows\Sunpath.AssemblyInfoInputs.cache
+D:\Projetos\coding\Sunpath\obj\Debug\net8.0-windows\Sunpath.AssemblyInfo.cs
+D:\Projetos\coding\Sunpath\obj\Debug\net8.0-windows\Sunpath.csproj.CoreCompileInputs.cache
+D:\Projetos\coding\Sunpath\obj\Debug\net8.0-windows\Sunpath.dll
+D:\Projetos\coding\Sunpath\obj\Debug\net8.0-windows\refint\Sunpath.dll
+D:\Projetos\coding\Sunpath\obj\Debug\net8.0-windows\Sunpath.pdb
+D:\Projetos\coding\Sunpath\obj\Debug\net8.0-windows\ref\Sunpath.dll

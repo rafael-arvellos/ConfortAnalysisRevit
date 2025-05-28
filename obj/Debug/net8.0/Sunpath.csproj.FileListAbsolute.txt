@@ -1,0 +1,12 @@
+D:\Projetos\coding\Sunpath\bin\Debug\net8.0\Sunpath.deps.json
+D:\Projetos\coding\Sunpath\bin\Debug\net8.0\Sunpath.dll
+D:\Projetos\coding\Sunpath\bin\Debug\net8.0\Sunpath.pdb
+D:\Projetos\coding\Sunpath\obj\Debug\net8.0\Sunpath.csproj.AssemblyReference.cache
+D:\Projetos\coding\Sunpath\obj\Debug\net8.0\Sunpath.GeneratedMSBuildEditorConfig.editorconfig
+D:\Projetos\coding\Sunpath\obj\Debug\net8.0\Sunpath.AssemblyInfoInputs.cache
+D:\Projetos\coding\Sunpath\obj\Debug\net8.0\Sunpath.AssemblyInfo.cs
+D:\Projetos\coding\Sunpath\obj\Debug\net8.0\Sunpath.csproj.CoreCompileInputs.cache
+D:\Projetos\coding\Sunpath\obj\Debug\net8.0\Sunpath.dll
+D:\Projetos\coding\Sunpath\obj\Debug\net8.0\refint\Sunpath.dll
+D:\Projetos\coding\Sunpath\obj\Debug\net8.0\Sunpath.pdb
+D:\Projetos\coding\Sunpath\obj\Debug\net8.0\ref\Sunpath.dll
