@@ -2,27 +2,67 @@ using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Selection;
-using System.Collections.Generic; // Necessário para List<>
+using System.Collections.Generic;
+using System.Windows.Media; // Necessário para List<>
 
 namespace Commands.SelectionUtils
 {
 
     /// Classe estática para armazenar as PlanarFaces selecionadas pelo usuário.
-    public static class DadosPlanarFace
+    public static class selectedPlanarFaceData
     {
         /// Lista que conterá as faces planas selecionadas.
-        public static List<PlanarFace> FacesPlanasSelecionadas { get; private set; } = new List<PlanarFace>();
+        public static List<Reference> selectedPlanarFacesRefs { get; private set; } = new List<Reference>();
 
         /// Método auxiliar para limpar a lista de faces selecionadas.
-        public static void LimparFacesSelecionadas()
+        public static void clearPlanarFacesRefs()
         {
-            FacesPlanasSelecionadas.Clear();
+            selectedPlanarFacesRefs.Clear();
         }
 
         /// Método auxiliar para adicionar uma face à lista.
-        public static void AdicionarFace(PlanarFace face)
+        public static void addPlanarFaceRefs(IList<Reference> reference)
         {
-            FacesPlanasSelecionadas.Add(face);
+            selectedPlanarFacesRefs.AddRange(reference);
+        }
+
+        // Se você quiser um método para obter as PlanarFaces na hora (com o Document atual)
+        public static List<PlanarFace> getSelectedPlanarFaces(Document doc)
+        {
+            var planarFaces = new List<PlanarFace>();
+            foreach (var faceRef in selectedPlanarFacesRefs)
+            {
+                Element elem = doc.GetElement(faceRef.ElementId);
+                if (elem != null)
+                {
+                    GeometryObject geoObj = elem.GetGeometryObjectFromReference(faceRef);
+                    if (geoObj is PlanarFace pf)
+                    {
+                        planarFaces.Add(pf);
+                    }
+                }
+            }
+            return planarFaces;
+        }
+    }
+
+    /// Classe estática para armazenar os Elementos selecionadas pelo usuário.
+    public static class selectedElementData
+    {
+
+        /// Lista que conterá os elementos selecionadas.
+        public static List<Reference> selectedElementsRefs { get; private set; } = new List<Reference>();
+
+        /// Método auxiliar para limpar a lista de elementos selecionados.
+        public static void clearSelectedElementRefs()
+        {
+            selectedElementsRefs.Clear();
+        }
+
+        /// Método auxiliar para limpar a lista de elementos selecionados.
+        public static void addElementRefs(IList<Reference> references)
+        {
+            selectedElementsRefs.AddRange(references);
         }
     }
 
@@ -41,43 +81,25 @@ namespace Commands.SelectionUtils
             try
             {
                 // 1. Limpa a lista de faces anteriormente selecionadas.
-                DadosPlanarFace.LimparFacesSelecionadas();
+                selectedPlanarFaceData.clearPlanarFacesRefs();
 
                 // 2. Solicita ao usuário que selecione faces.
                 IList<Reference> pickedRefs = uiDoc.Selection.PickObjects(
                     ObjectType.Face,
                     "Selecione uma ou mais faces planas e clique em 'Finish' na barra de opções." // Mensagem mostrada ao usuário.
                 );
+                
+                if (pickedRefs != null && pickedRefs.Any())
+                {
+                    selectedPlanarFaceData.addPlanarFaceRefs(pickedRefs);
 
-                // Verifica se o usuário selecionou algo.
-                if (pickedRefs == null || pickedRefs.Count == 0)
+                    TaskDialog.Show("Seleção de Faces", $"{selectedPlanarFaceData.selectedPlanarFacesRefs.Count} face(s) selecionado(s) e referência(s) armazenada(s).");
+                }
+                else
                 {
                     TaskDialog.Show("Seleção", "Nenhuma face foi selecionada.");
                     return Result.Cancelled; // Usuário não selecionou nada ou cancelou.
                 }
-
-                int facesPlanasAdicionadas = 0;
-                foreach (Reference pickedRef in pickedRefs)
-                {
-                    // 3. Para cada Reference obtida, precisamos pegar o objeto de geometria real.
-                    Element elem = doc.GetElement(pickedRef.ElementId);
-
-                    // Depois, usamos a Reference para obter o GeometryObject específico (a face).
-                    GeometryObject geoObject = elem.GetGeometryObjectFromReference(pickedRef);
-
-                    // 4. Verificamos se o objeto geométrico é de fato uma PlanarFace.
-                    if (geoObject is PlanarFace planarFace)
-                    {
-                        // Se for uma PlanarFace, adicionamos à nossa lista estática.
-                        DadosPlanarFace.AdicionarFace(planarFace);
-                        facesPlanasAdicionadas++;
-                    }
-                }
-
-                // 5. Informa ao usuário quantas faces planas foram armazenadas.
-                TaskDialog.Show("Seleção de Faces Planas Concluída",
-                    $"{facesPlanasAdicionadas} face(s) plana(s) foram selecionadas e armazenadas com sucesso.\n" +
-                    $"Total na lista: {DadosPlanarFace.FacesPlanasSelecionadas.Count} face(s).");
 
                 return Result.Succeeded;
             }
@@ -97,5 +119,63 @@ namespace Commands.SelectionUtils
         }
     }
 
+    [Transaction(TransactionMode.ReadOnly)] // ReadOnly porque apenas lemos dados do modelo.
+    public class CaptureCurrentSelectionCommand : IExternalCommand
+    {
+        public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
+        {
+            UIApplication uiApp = commandData.Application;
+            UIDocument uiDoc = uiApp.ActiveUIDocument;
+            Document doc = uiDoc.Document;
+
+            try
+            {
+                // 1. Limpa a lista de faces anteriormente selecionadas.
+                selectedElementData.clearSelectedElementRefs();
+
+                // 2. Obter os ElementIds da seleção atual na UI do Revit
+                ICollection<ElementId> selectedIds = uiDoc.Selection.GetElementIds();
+
+                if (selectedIds != null && selectedIds.Any())
+                {
+                    // 3. Converter ElementIds em References e adicioná-los à lista
+                    List<Reference> newReferences = new List<Reference>();
+                    foreach (ElementId id in selectedIds)
+                    {
+                        Element elem = doc.GetElement(id);
+                        if (elem != null)
+                        {
+                            Reference elemRef = new Reference(elem);
+                            newReferences.Add(elemRef);
+                        }
+                    }
+
+                    // Adiciona as novas referências à classe de armazenamento estático
+                    selectedElementData.addElementRefs(newReferences);
+
+                    // 4. Feedback ao Usuário
+                    TaskDialog.Show("Seleção Capturada", $"{selectedElementData.selectedElementsRefs.Count} elemento(s) selecionado(s) foram capturados e suas referências armazenadas.");
+                }
+                else
+                {
+                    TaskDialog.Show("Capturar Seleção", "Nenhum elemento está selecionado no Revit.");
+                    return Result.Cancelled;
+                }
+
+                return Result.Succeeded;
+            }
+            catch (Autodesk.Revit.Exceptions.OperationCanceledException)
+            {
+                TaskDialog.Show("Cancelado", "A seleção de elementos foi cancelada.");
+                return Result.Cancelled;
+            }
+            catch (System.Exception ex)
+            {
+                message = ex.Message;
+                TaskDialog.Show("Erro na Seleção", $"Ocorreu um erro: {ex.Message}");
+                return Result.Failed;
+            }
+        }
+    }
 
 }

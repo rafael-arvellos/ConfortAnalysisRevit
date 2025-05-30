@@ -1,7 +1,7 @@
 using System.Windows;
 using System.Windows.Controls.Primitives;
 
-namespace ConfortAnalysis.Views
+namespace Views.Windows
 {
     public partial class ConfigWindow : Window
     {
@@ -10,7 +10,7 @@ namespace ConfortAnalysis.Views
             InitializeComponent();
 
             // Linkar eventos de Checked e Unchecked
-            AdvancedConfigToggle.Checked   += AdvancedConfigToggle_Changed;
+            AdvancedConfigToggle.Checked += AdvancedConfigToggle_Changed;
             AdvancedConfigToggle.Unchecked += AdvancedConfigToggle_Changed;
 
             // Atualiza a visibilidade logo ao iniciar
@@ -28,7 +28,7 @@ namespace ConfortAnalysis.Views
 
             // Painéis que devem aparecer sempre (mesmo sem advanced)
             CustomPeriodPanel.Visibility = Visibility.Visible;
-            CustomMeshPanel.Visibility   = Visibility.Visible;
+            CustomMeshPanel.Visibility = Visibility.Visible;
 
             // Todos os outros painéis “avançados”:
             // Supondo que você tenha nomeado:
@@ -44,8 +44,8 @@ namespace ConfortAnalysis.Views
 
             foreach (var pnl in advancedPanels)
             {
-                pnl.Visibility = showAll 
-                    ? Visibility.Visible 
+                pnl.Visibility = showAll
+                    ? Visibility.Visible
                     : Visibility.Collapsed;
             }
         }

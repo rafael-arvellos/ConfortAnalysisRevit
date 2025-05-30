@@ -37,7 +37,7 @@ namespace ConfortAnalysis.Views
                                          addIcon:   "Resources/icons/add.png",
                                          remIcon:   "Resources/icons/remove.png");
 
-            AddPushButton(panel, "SelectGeoms",     "Select Geometries",    assemblyPath, "ConfortAnalysis.Commands.SelectGeometriesCommand",   "Resources/icons/select.png");
+            AddPushButton(panel, "SelectGeoms",     "Select Geometries",    assemblyPath, "Commands.SelectionUtils.CaptureCurrentSelectionCommand",   "Resources/icons/select.png");
             AddSplitButtonsForCollection(panel,
                                          "Geoms",
                                          "GeometryIds",
@@ -49,9 +49,9 @@ namespace ConfortAnalysis.Views
                                          addIcon:   "Resources/icons/add.png",
                                          remIcon:   "Resources/icons/remove.png");
 
-            AddPushButton(panel, "ConfigDirectSun", "Config.",       assemblyPath, "ConfortAnalysis.Commands.ConfigDirectSunHoursCommand", "Resources/icons/config.png");
+            AddPushButton(panel, "ConfigDirectSun", "Config.",       assemblyPath, "Commands.Config.ConfigCommand", "Resources/icons/config.png");
             AddPushButton(panel, "RunDirectSun",    "Run",           assemblyPath, "ConfortAnalysis.Commands.RunDirectSunHoursCommand",    "Resources/icons/run.png");
-
+            AddPushButton(panel, "Debug",    "Debug",           assemblyPath, "Commands.Debug.DebugSelectionInfoCommand",    "Resources/icons/debug.png");
         }
         
         private static void AddPushButton(RibbonPanel panel,
