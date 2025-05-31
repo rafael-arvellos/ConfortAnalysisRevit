@@ -77,12 +77,18 @@ public static class GeometryUtils
     }
 
     public static List<XYZ> GenerateUVPoints(
-        XYZ origin, XYZ xVec, XYZ yVec, XYZ normal,
-        BoundingBoxUV uvBox,
+        PlanarFace planarFace,
         double step)
     {
+        // 1. Obter os parâmetros geométricos da face
+        ComputeBboxUV(planarFace, 
+                      out XYZ origin, 
+                      out BoundingBoxUV uvBox, 
+                      out XYZ xVec, 
+                      out XYZ yVec, 
+                      out XYZ normal);
 
-        // 1. Calcula largura e altura no domínio UV
+        // 2. Calcula largura e altura no domínio UV
         double uMin = uvBox.Min.U, vMin = uvBox.Min.V;
         double uMax = uvBox.Max.U, vMax = uvBox.Max.V;
 
@@ -91,13 +97,13 @@ public static class GeometryUtils
 
         const double offset = 0.02;
 
-        // 2. Quantidade de passos em U e V
+        // 3. Quantidade de passos em U e V
         int stepsU = (int)Math.Ceiling(width  / step);
         int stepsV = (int)Math.Ceiling(height / step);
 
-        var points = new List<XYZ>((stepsU + 1) * (stepsV + 1));
+        var points = new List<XYZ>();
 
-        // 3. Loop sobre a malha UV
+        // 4. Loop sobre a malha UV
         for (int u = 0; u <= stepsU; u++)
         {
             double uParam = Math.Min(uMin + u * step, uMax);
@@ -105,18 +111,22 @@ public static class GeometryUtils
             {
                 double vParam = Math.Min(vMin + v * step, vMax);
 
-                // 4. Constrói o ponto em XYZ
-                XYZ p = origin
-                        + xVec.Multiply(uParam)
-                        + yVec.Multiply(vParam);
+                //5. Verificar se o ponto uv está dentro da face
+                UV uvCoords = new UV(uParam, vParam);
+                if (planarFace.IsInside(uvCoords))
+                {
+                    // 6. Constrói o ponto em XYZ
+                    XYZ p = origin
+                            + xVec.Multiply(uParam)
+                            + yVec.Multiply(vParam);
 
-                // 5. Desloca 2 cm ao longo da normal
-                XYZ pOffset = p + normal.Multiply(offset);
+                    // 7. Desloca 2 cm ao longo da normal
+                    XYZ pOffset = p + normal.Multiply(offset);
 
-                points.Add(pOffset);
+                    points.Add(pOffset);                    
+                }
             }
         }
-
         return points;
     }
 }

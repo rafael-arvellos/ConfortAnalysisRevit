@@ -2,8 +2,7 @@ using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Selection;
-using System.Collections.Generic;
-using System.Windows.Media; // Necessário para List<>
+
 
 namespace Commands.SelectionUtils
 {
@@ -93,11 +92,11 @@ namespace Commands.SelectionUtils
                 {
                     selectedPlanarFaceData.addPlanarFaceRefs(pickedRefs);
 
-                    TaskDialog.Show("Seleção de Faces", $"{selectedPlanarFaceData.selectedPlanarFacesRefs.Count} face(s) selecionado(s) e referência(s) armazenada(s).");
+                    Autodesk.Revit.UI.TaskDialog.Show("Seleção de Faces", $"{selectedPlanarFaceData.selectedPlanarFacesRefs.Count} face(s) selecionado(s) e referência(s) armazenada(s).");
                 }
                 else
                 {
-                    TaskDialog.Show("Seleção", "Nenhuma face foi selecionada.");
+                    Autodesk.Revit.UI.TaskDialog.Show("Seleção", "Nenhuma face foi selecionada.");
                     return Result.Cancelled; // Usuário não selecionou nada ou cancelou.
                 }
 
@@ -106,14 +105,14 @@ namespace Commands.SelectionUtils
             catch (Autodesk.Revit.Exceptions.OperationCanceledException)
             {
                 // Ocorre se o usuário pressionar ESC durante a seleção.
-                TaskDialog.Show("Cancelado", "A seleção de faces foi cancelada pelo usuário.");
+                Autodesk.Revit.UI.TaskDialog.Show("Cancelado", "A seleção de faces foi cancelada pelo usuário.");
                 return Result.Cancelled;
             }
             catch (Exception ex)
             {
                 // Captura qualquer outro erro inesperado.
                 message = $"Erro ao selecionar faces planas: {ex.Message}";
-                TaskDialog.Show("Erro", message);
+                Autodesk.Revit.UI.TaskDialog.Show("Erro", message);
                 return Result.Failed;
             }
         }
@@ -154,11 +153,11 @@ namespace Commands.SelectionUtils
                     selectedElementData.addElementRefs(newReferences);
 
                     // 4. Feedback ao Usuário
-                    TaskDialog.Show("Seleção Capturada", $"{selectedElementData.selectedElementsRefs.Count} elemento(s) selecionado(s) foram capturados e suas referências armazenadas.");
+                    Autodesk.Revit.UI.TaskDialog.Show("Seleção Capturada", $"{selectedElementData.selectedElementsRefs.Count} elemento(s) selecionado(s) foram capturados e suas referências armazenadas.");
                 }
                 else
                 {
-                    TaskDialog.Show("Capturar Seleção", "Nenhum elemento está selecionado no Revit.");
+                    Autodesk.Revit.UI.TaskDialog.Show("Capturar Seleção", "Nenhum elemento está selecionado no Revit.");
                     return Result.Cancelled;
                 }
 
@@ -166,13 +165,13 @@ namespace Commands.SelectionUtils
             }
             catch (Autodesk.Revit.Exceptions.OperationCanceledException)
             {
-                TaskDialog.Show("Cancelado", "A seleção de elementos foi cancelada.");
+                Autodesk.Revit.UI.TaskDialog.Show("Cancelado", "A seleção de elementos foi cancelada.");
                 return Result.Cancelled;
             }
             catch (System.Exception ex)
             {
                 message = ex.Message;
-                TaskDialog.Show("Erro na Seleção", $"Ocorreu um erro: {ex.Message}");
+                Autodesk.Revit.UI.TaskDialog.Show("Erro na Seleção", $"Ocorreu um erro: {ex.Message}");
                 return Result.Failed;
             }
         }
