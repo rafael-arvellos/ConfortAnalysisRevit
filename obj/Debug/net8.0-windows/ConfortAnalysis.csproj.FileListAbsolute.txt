@@ -43,3 +43,4 @@ D:\Projetos\coding\ConfortAnalysis\obj\Debug\net8.0-windows\ConfortAnalysis.dll
 D:\Projetos\coding\ConfortAnalysis\obj\Debug\net8.0-windows\refint\ConfortAnalysis.dll
 D:\Projetos\coding\ConfortAnalysis\obj\Debug\net8.0-windows\ConfortAnalysis.pdb
 D:\Projetos\coding\ConfortAnalysis\obj\Debug\net8.0-windows\ref\ConfortAnalysis.dll
+C:\Users\afabi\OneDrive\Documentos\coding\ConfortAnalysisRevit\bin\Debug\net8.0-windows\Resources\icons\debug.png

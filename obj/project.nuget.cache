@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "ep4HvvSk+zk=",
+  "dgSpecHash": "jgpMvL2MfqM=",
   "success": true,
-  "projectFilePath": "D:\\Projetos\\coding\\ConfortAnalysis\\ConfortAnalysis.csproj",
+  "projectFilePath": "C:\\Users\\afabi\\OneDrive\\Documentos\\coding\\ConfortAnalysisRevit\\ConfortAnalysis.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\afabi\\.nuget\\packages\\nettopologysuite\\2.6.0\\nettopologysuite.2.6.0.nupkg.sha512"
   ],

@@ -10,6 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using System.Globalization;
 
 namespace Commands.GeneratePoints
 {
@@ -17,31 +18,33 @@ namespace Commands.GeneratePoints
     public static class generatedPointsData
     {
 
-        /// Lista estática para armazenar os pontos XYZ gerados.
-        public static List<XYZ> pointList { get; private set; } = new List<XYZ>();
-
+        /// Mapeia cada Reference de face para a lista de pontos XYZ gerados nessa face.
+        public static Dictionary<Reference, List<XYZ>> pointsPerFace { get; private set; } 
+            = new Dictionary<Reference, List<XYZ>>();
         /// Limpa todos os pontos armazenados na lista.
         public static void clearPointList()
         {
-            pointList.Clear();
+            pointsPerFace.Clear();
         }
 
-        /// Adiciona uma coleção de pontos XYZ à lista.
-        public static void addPoints(IEnumerable<XYZ> points)
+        /// Armazena a lista de pontos associada àquela face (Reference).
+        public static void addPointsForFace(Reference faceRef, IEnumerable<XYZ> points)
         {
-            if (points != null)
-            {
-                pointList.AddRange(points);
-            }
+            if (faceRef == null || points == null) return;
+            if (!pointsPerFace.ContainsKey(faceRef))
+                pointsPerFace[faceRef] = new List<XYZ>();
+
+            pointsPerFace[faceRef].AddRange(points);
         }
 
-        /// Adiciona um único ponto XYZ à lista.
-        public static void addPoint(XYZ point)
+        /// Retorna a lista de pontos para uma face; se não existir, devolve lista vazia.
+        public static List<XYZ> getPointsForFace(Reference faceRef)
         {
-            if (point != null)
-            {
-                pointList.Add(point);
-            }
+            if (faceRef == null) return new List<XYZ>();
+            if (!pointsPerFace.TryGetValue(faceRef, out var list))
+                return new List<XYZ>();
+
+            return list;
         }
     }
 
@@ -56,7 +59,8 @@ namespace Commands.GeneratePoints
 
 
             // Verifica se existem faces selecionadas
-            if (selectedPlanarFaceData.selectedPlanarFacesRefs == null || !selectedPlanarFaceData.selectedPlanarFacesRefs.Any())
+            if (selectedPlanarFaceData.selectedPlanarFacesRefs == null
+                || !selectedPlanarFaceData.selectedPlanarFacesRefs.Any())
             {
                 Autodesk.Revit.UI.TaskDialog.Show("Gerar Pontos", "Nenhuma face armazenada. Use o comando 'Select Faces' primeiro.");
                 return Result.Cancelled;
@@ -74,19 +78,10 @@ namespace Commands.GeneratePoints
             {
                 foreach (var faceRef in selectedPlanarFaceData.selectedPlanarFacesRefs)
                 {
-                    Element? elem = doc.GetElement(faceRef.ElementId);
+                    Element elem = doc.GetElement(faceRef.ElementId);
                     PlanarFace? planarFace = elem?.GetGeometryObjectFromReference(faceRef) as PlanarFace;
-
                     if (planarFace == null) continue;
 
-                    // 1. Extrair dados da geometria da face
-                    GeometryUtils.ComputeBboxUV(
-                        planarFace,
-                        out XYZ origin,
-                        out BoundingBoxUV bboxUV,
-                        out XYZ xVector,
-                        out XYZ yVector,
-                        out XYZ normal);
 
                     // 2. Gerar pontos na superfície da face
                     List<XYZ> surfacePoints = GeometryUtils.GenerateUVPoints(
@@ -98,7 +93,7 @@ namespace Commands.GeneratePoints
                     // 3. Armazenar os pontos gerados
                     if (surfacePoints != null && surfacePoints.Any())
                     {
-                        generatedPointsData.addPoints(surfacePoints);
+                        generatedPointsData.addPointsForFace(faceRef, surfacePoints);
                         totalPointsStored += surfacePoints.Count;
                     }
                 }
@@ -215,7 +210,8 @@ namespace Commands.GeneratePoints
             Document doc = uiDoc.Document;
 
             // 1. Verificar se existem faces selecionadas
-            if (selectedPlanarFaceData.selectedPlanarFacesRefs == null || !selectedPlanarFaceData.selectedPlanarFacesRefs.Any())
+            if (selectedPlanarFaceData.selectedPlanarFacesRefs == null
+                || !selectedPlanarFaceData.selectedPlanarFacesRefs.Any())
             {
                 Autodesk.Revit.UI.TaskDialog.Show("Exportar SVG", "Nenhuma face armazenada. Use o comando 'Select Faces' primeiro.");
                 return Result.Cancelled;
@@ -267,9 +263,12 @@ namespace Commands.GeneratePoints
                         out XYZ yVec,
                         out XYZ normal);
 
+                    double uMin = bboxUV.Min.U, vMin = bboxUV.Min.V;
+                    double uMax = bboxUV.Max.U, vMax = bboxUV.Max.V;
+
                     // 4.b. Calcular dimensões do SVG
-                    double uvWidth = bboxUV.Max.U - bboxUV.Min.U;
-                    double uvHeight = bboxUV.Max.V - bboxUV.Min.V;
+                    double uvWidth = uMax - uMin;
+                    double uvHeight = vMax - vMin;
 
                     double svgWidth = uvWidth * SvgScale;
                     double svgHeight = uvHeight * SvgScale;
@@ -282,83 +281,83 @@ namespace Commands.GeneratePoints
                     }
 
                     // 4.c. Iniciar construção da string SVG
-                    StringBuilder svgBuilder = new StringBuilder();
-                    svgBuilder.AppendLine($"<svg width='{svgWidth:F2}' height='{svgHeight:F2}' xmlns='http://www.w3.org/2000/svg' style='background-color:{SvgBackgroundColor}; border:1px solid black;'>");
-                    // Adiciona um título ao SVG (opcional)
+                    var svgBuilder = new StringBuilder();
+                    svgBuilder.AppendLine(
+                        $"<svg width=\"{svgWidth.ToString("F2", CultureInfo.InvariantCulture)}\" " +
+                        $"height=\"{svgHeight.ToString("F2", CultureInfo.InvariantCulture)}\" " +
+                        $"xmlns=\"http://www.w3.org/2000/svg\" " +
+                        $"style=\"background-color:{SvgBackgroundColor};border:1px solid #000\">");
                     svgBuilder.AppendLine($"  <title>Face Points - Element {elem.Id} - Face {faceProcessedCounter}</title>");
-                    
-                    IList<CurveLoop> curveLoops = planarFace.GetEdgesAsCurveLoops();
-                    foreach (CurveLoop loop in curveLoops)
+
+                    IList<CurveLoop> curveloops = planarFace.GetEdgesAsCurveLoops();
+                    foreach (CurveLoop loop in curveloops)
                     {
-                        StringBuilder polylinePointsStr = new StringBuilder();
+                        var polylinePointsStr = new StringBuilder();
                         foreach (Curve curveInLoop in loop)
                         {
                             IList<XYZ> tessellatedPoints = curveInLoop.Tessellate();
-                            foreach (XYZ pointOnEdge3D in tessellatedPoints)
+                            foreach (XYZ pt3D in tessellatedPoints)
                             {
-                                // Projetar o ponto 3D da aresta para o sistema UV 2D da face
-                                XYZ vectorFromOrigin = pointOnEdge3D - origin; // 'origin' da face
-                                double u_coord_face = vectorFromOrigin.DotProduct(xVec); // 'xVec' da face
-                                double v_coord_face = vectorFromOrigin.DotProduct(yVec); // 'yVec' da face
+                                XYZ vec = pt3D - origin;
+                                double uCoord = vec.DotProduct(xVec);
+                                double vCoord = vec.DotProduct(yVec);
 
-                                // Converter coordenadas UV da face para coordenadas SVG
-                                double svg_edge_x = (u_coord_face - bboxUV.Min.U) * SvgScale;
-                                double svg_edge_y = (bboxUV.Max.V - v_coord_face) * SvgScale; // Y é invertido
+                                // UV → SVG (note que invertemos o eixo Y: vMax - vCoord)
+                                double svgX = (uCoord - uMin) * SvgScale;
+                                double svgY = (vMax - vCoord) * SvgScale;
 
-                                polylinePointsStr.AppendFormat("{0:F2},{1:F2} ", svg_edge_x, svg_edge_y);
+                                string sx = svgX.ToString("F2", CultureInfo.InvariantCulture);
+                                string sy = svgY.ToString("F2", CultureInfo.InvariantCulture);
+                                polylinePointsStr.Append(sx).Append(',').Append(sy).Append(' ');
                             }
                         }
 
                         if (polylinePointsStr.Length > 0)
                         {
-                            svgBuilder.AppendLine($"  <polyline points='{polylinePointsStr.ToString().TrimEnd()}' fill='none' stroke='{EdgeStrokeColorSvg}' stroke-width='{EdgeStrokeWidthSvg:F1}'/>");
+                            svgBuilder.AppendLine(
+                                $"  <polyline points=\"{polylinePointsStr.ToString().TrimEnd()}\" " +
+                                $"fill=\"none\" stroke=\"{EdgeStrokeColorSvg}\" stroke-width=\"{EdgeStrokeWidthSvg.ToString("F1", CultureInfo.InvariantCulture)}\"/>");
                         }
                     }
-
-                    // 4.d. Recriar lógica de geração de pontos para obter coordenadas UV relativas
-                    double pointStep = 0.5; // Use o mesmo step da geração original, se aplicável, ou defina um aqui.
-                                            // Este é o step usado em GeometryUtils.GenerateUVPoints
-
-                    double uMin = bboxUV.Min.U;
-                    double vMin = bboxUV.Min.V;
-                    double uMax = bboxUV.Max.U;
-                    double vMax = bboxUV.Max.V;
-
-                    int stepsU = (int)Math.Ceiling(uvWidth / pointStep);
-                    int stepsV = (int)Math.Ceiling(uvHeight / pointStep);
-
-                    for (int u_idx = 0; u_idx <= stepsU; u_idx++)
+                    
+                    // 6) Desenha apenas os pontos já gerados e armazenados para esta face
+                    List<XYZ> ptsThisFace = generatedPointsData.getPointsForFace(faceRef);
+                    foreach (var pt3D in ptsThisFace)
                     {
-                        double current_u_on_face = Math.Min(uMin + u_idx * pointStep, uMax);
-                        for (int v_idx = 0; v_idx <= stepsV; v_idx++)
-                        {
-                            double current_v_on_face = Math.Min(vMin + v_idx * pointStep, vMax);
+                        // Projeta cada ponto 3D em UV
+                        XYZ vec = pt3D - origin;
+                        double uCoord = vec.DotProduct(xVec);
+                        double vCoord = vec.DotProduct(yVec);
 
-                            // 4.e. Transformar para coordenadas SVG
-                            // cx: relativo à esquerda do bboxUV, escalado
-                            double cx = (current_u_on_face - uMin) * SvgScale;
-                            // cy: relativo ao topo do bboxUV (Y invertido), escalado
-                            double cy = (vMax - current_v_on_face) * SvgScale;
+                        // Verificação extra (por precaução)
+                        if (!planarFace.IsInside(new UV(uCoord, vCoord)))
+                            continue;
 
-                            svgBuilder.AppendLine($"  <circle cx='{cx:F2}' cy='{cy:F2}' r='{PointRadiusSvg:F2}' fill='{PointFillColorSvg}' />");
-                        }
+                        double svgX = (uCoord - uMin) * SvgScale;
+                        double svgY = (vMax - vCoord) * SvgScale;
+
+                        string sx = svgX.ToString("F2", CultureInfo.InvariantCulture);
+                        string sy = svgY.ToString("F2", CultureInfo.InvariantCulture);
+                        string sr = PointRadiusSvg.ToString("F2", CultureInfo.InvariantCulture);
+
+                        svgBuilder.AppendLine(
+                            $"  <circle cx=\"{sx}\" cy=\"{sy}\" r=\"{sr}\" fill=\"{PointFillColorSvg}\" />");
                     }
 
                     // 4.f. Fechar tag SVG
                     svgBuilder.AppendLine("</svg>");
 
-                    // 4.g. Gerar nome do arquivo e salvar
-                    // Usar um nome de arquivo mais robusto para evitar problemas com caracteres inválidos
                     string safeElementName = elem.Id.ToString();
-                    // Se o elemento tiver um nome, pode ser mais descritivo, mas precisa sanitizar
-                    // string elementNameSanitized = string.Join("_", (elem.Name ?? $"Elem_{elem.Id}").Split(Path.GetInvalidFileNameChars()));
-
-                    string fileName = Path.Combine(outputFolderPath, $"FacePoints_Elem{safeElementName}_FaceIdx{faceProcessedCounter}.svg");
+                    string fileName = Path.Combine(
+                        outputFolderPath,
+                        $"FacePoints_Elem{safeElementName}_FaceIdx{faceProcessedCounter}.svg");
                     File.WriteAllText(fileName, svgBuilder.ToString());
                     svgFileCounter++;
                 }
 
                 Autodesk.Revit.UI.TaskDialog.Show("Exportar SVG", $"{svgFileCounter} arquivo(s) SVG gerado(s) com sucesso em:\n{outputFolderPath}");
+                return Result.Succeeded;
+            
             }
             catch (Exception ex)
             {
@@ -366,9 +365,6 @@ namespace Commands.GeneratePoints
                 Autodesk.Revit.UI.TaskDialog.Show("Erro ao Exportar SVG", message);
                 return Result.Failed;
             }
-
-            return Result.Succeeded;
         }
     }
-
 }

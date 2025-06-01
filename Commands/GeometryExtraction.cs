@@ -95,7 +95,7 @@ public static class GeometryUtils
         double width  = uMax - uMin;
         double height = vMax - vMin;
 
-        const double offset = 0.02;
+        const double ep = 1e-6;
 
         // 3. Quantidade de passos em U e V
         int stepsU = (int)Math.Ceiling(width  / step);
@@ -106,26 +106,38 @@ public static class GeometryUtils
         // 4. Loop sobre a malha UV
         for (int u = 0; u <= stepsU; u++)
         {
-            double uParam = Math.Min(uMin + u * step, uMax);
-            for (int v = 0; v <= stepsV; v++)
-            {
-                double vParam = Math.Min(vMin + v * step, vMax);
+            double uRaw = uMin + u * step;
+            double uParam = (uRaw < uMax)
+                            ? uRaw
+                            : (uMax - ep);
 
-                //5. Verificar se o ponto uv está dentro da face
-                UV uvCoords = new UV(uParam, vParam);
-                if (planarFace.IsInside(uvCoords))
+            if (uParam < uMin + ep)
+                uParam = uMin = ep;            
+
+            for (int v = 0; v <= stepsV; v++)
                 {
-                    // 6. Constrói o ponto em XYZ
-                    XYZ p = origin
-                            + xVec.Multiply(uParam)
-                            + yVec.Multiply(vParam);
+                    double vRaw = vMin + v * step;
+                    double vParam = (vRaw < vMax)
+                                    ? vRaw
+                                    : (vMax - ep);
+
+                    if (vParam < vMin + ep)
+                        vParam = vMin = ep;       
+                             
+                    //5. Verificar se o ponto uv está dentro da face
+                    UV uvCoords = new UV(uParam, vParam);
+                    if (!planarFace.IsInside(uvCoords))
+                        continue;
+
+                    XYZ pOnFace = planarFace.Evaluate(uvCoords);
+
+                const double offset = 0.02;
 
                     // 7. Desloca 2 cm ao longo da normal
-                    XYZ pOffset = p + normal.Multiply(offset);
+                    XYZ pOffset = pOnFace + normal.Multiply(offset);
 
-                    points.Add(pOffset);                    
+                    points.Add(pOffset);
                 }
-            }
         }
         return points;
     }

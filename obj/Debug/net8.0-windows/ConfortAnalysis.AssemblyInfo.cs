@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ConfortAnalysis")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+6e223a4ef37891ba9709a0cc6bf5386cb0a9980a")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b6252a04af38d9e61c144c963bfad3b95267a3c1")]
 [assembly: System.Reflection.AssemblyProductAttribute("ConfortAnalysis")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ConfortAnalysis")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
