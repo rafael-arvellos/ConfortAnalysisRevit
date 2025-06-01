@@ -2,72 +2,13 @@ using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Selection;
+using ConfortAnalysis.Data;
 
 
-namespace Commands.SelectionUtils
+namespace ConfortAnalysis.Commands
 {
-
-    /// Classe estática para armazenar as PlanarFaces selecionadas pelo usuário.
-    public static class selectedPlanarFaceData
-    {
-        /// Lista que conterá as faces planas selecionadas.
-        public static List<Reference> selectedPlanarFacesRefs { get; private set; } = new List<Reference>();
-
-        /// Método auxiliar para limpar a lista de faces selecionadas.
-        public static void clearPlanarFacesRefs()
-        {
-            selectedPlanarFacesRefs.Clear();
-        }
-
-        /// Método auxiliar para adicionar uma face à lista.
-        public static void addPlanarFaceRefs(IList<Reference> reference)
-        {
-            selectedPlanarFacesRefs.AddRange(reference);
-        }
-
-        // Se você quiser um método para obter as PlanarFaces na hora (com o Document atual)
-        public static List<PlanarFace> getSelectedPlanarFaces(Document doc)
-        {
-            var planarFaces = new List<PlanarFace>();
-            foreach (var faceRef in selectedPlanarFacesRefs)
-            {
-                Element elem = doc.GetElement(faceRef.ElementId);
-                if (elem != null)
-                {
-                    GeometryObject geoObj = elem.GetGeometryObjectFromReference(faceRef);
-                    if (geoObj is PlanarFace pf)
-                    {
-                        planarFaces.Add(pf);
-                    }
-                }
-            }
-            return planarFaces;
-        }
-    }
-
-    /// Classe estática para armazenar os Elementos selecionadas pelo usuário.
-    public static class selectedElementData
-    {
-
-        /// Lista que conterá os elementos selecionadas.
-        public static List<Reference> selectedElementsRefs { get; private set; } = new List<Reference>();
-
-        /// Método auxiliar para limpar a lista de elementos selecionados.
-        public static void clearSelectedElementRefs()
-        {
-            selectedElementsRefs.Clear();
-        }
-
-        /// Método auxiliar para limpar a lista de elementos selecionados.
-        public static void addElementRefs(IList<Reference> references)
-        {
-            selectedElementsRefs.AddRange(references);
-        }
-    }
-
-    /// Comando externo para selecionar uma ou mais faces planas (PlanarFace)
-    [Transaction(TransactionMode.ReadOnly)] // ReadOnly porque apenas lemos dados do modelo.
-    [Regeneration(RegenerationOption.Manual)] // Não precisamos de regeneração automática.
+    [Transaction(TransactionMode.ReadOnly)] 
+    [Regeneration(RegenerationOption.Manual)] 
     public class SelectFacesCommand : IExternalCommand
     {
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
@@ -80,7 +21,7 @@ namespace Commands.SelectionUtils
             try
             {
                 // 1. Limpa a lista de faces anteriormente selecionadas.
-                selectedPlanarFaceData.clearPlanarFacesRefs();
+                ApplicationDataFunctions.ClearRefs(ApplicationData.SelectedPlanarFacesRefs);
 
                 // 2. Solicita ao usuário que selecione faces.
                 IList<Reference> pickedRefs = uiDoc.Selection.PickObjects(
@@ -90,9 +31,9 @@ namespace Commands.SelectionUtils
                 
                 if (pickedRefs != null && pickedRefs.Any())
                 {
-                    selectedPlanarFaceData.addPlanarFaceRefs(pickedRefs);
+                    ApplicationDataFunctions.AddRefs(ApplicationData.SelectedPlanarFacesRefs, pickedRefs);
 
-                    Autodesk.Revit.UI.TaskDialog.Show("Seleção de Faces", $"{selectedPlanarFaceData.selectedPlanarFacesRefs.Count} face(s) selecionado(s) e referência(s) armazenada(s).");
+                    Autodesk.Revit.UI.TaskDialog.Show("Seleção de Faces", $"{ApplicationData.SelectedPlanarFacesRefs.Count} face(s) selecionado(s) e referência(s) armazenada(s).");
                 }
                 else
                 {
@@ -118,7 +59,7 @@ namespace Commands.SelectionUtils
         }
     }
 
-    [Transaction(TransactionMode.ReadOnly)] // ReadOnly porque apenas lemos dados do modelo.
+    [Transaction(TransactionMode.ReadOnly)]
     public class CaptureCurrentSelectionCommand : IExternalCommand
     {
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
@@ -130,7 +71,7 @@ namespace Commands.SelectionUtils
             try
             {
                 // 1. Limpa a lista de faces anteriormente selecionadas.
-                selectedElementData.clearSelectedElementRefs();
+                ApplicationDataFunctions.ClearRefs(ApplicationData.SelectedElementsRefs);
 
                 // 2. Obter os ElementIds da seleção atual na UI do Revit
                 ICollection<ElementId> selectedIds = uiDoc.Selection.GetElementIds();
@@ -150,10 +91,10 @@ namespace Commands.SelectionUtils
                     }
 
                     // Adiciona as novas referências à classe de armazenamento estático
-                    selectedElementData.addElementRefs(newReferences);
+                    ApplicationDataFunctions.AddRefs(ApplicationData.SelectedElementsRefs, newReferences);
 
                     // 4. Feedback ao Usuário
-                    Autodesk.Revit.UI.TaskDialog.Show("Seleção Capturada", $"{selectedElementData.selectedElementsRefs.Count} elemento(s) selecionado(s) foram capturados e suas referências armazenadas.");
+                    Autodesk.Revit.UI.TaskDialog.Show("Seleção Capturada", $"{ApplicationData.SelectedElementsRefs.Count} elemento(s) selecionado(s) foram capturados e suas referências armazenadas.");
                 }
                 else
                 {

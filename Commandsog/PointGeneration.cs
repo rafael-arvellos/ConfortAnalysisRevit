@@ -14,39 +14,6 @@ using System.Globalization;
 
 namespace Commands.GeneratePoints
 {
-    
-    public static class generatedPointsData
-    {
-
-        /// Mapeia cada Reference de face para a lista de pontos XYZ gerados nessa face.
-        public static Dictionary<Reference, List<XYZ>> pointsPerFace { get; private set; } 
-            = new Dictionary<Reference, List<XYZ>>();
-        /// Limpa todos os pontos armazenados na lista.
-        public static void clearPointList()
-        {
-            pointsPerFace.Clear();
-        }
-
-        /// Armazena a lista de pontos associada àquela face (Reference).
-        public static void addPointsForFace(Reference faceRef, IEnumerable<XYZ> points)
-        {
-            if (faceRef == null || points == null) return;
-            if (!pointsPerFace.ContainsKey(faceRef))
-                pointsPerFace[faceRef] = new List<XYZ>();
-
-            pointsPerFace[faceRef].AddRange(points);
-        }
-
-        /// Retorna a lista de pontos para uma face; se não existir, devolve lista vazia.
-        public static List<XYZ> getPointsForFace(Reference faceRef)
-        {
-            if (faceRef == null) return new List<XYZ>();
-            if (!pointsPerFace.TryGetValue(faceRef, out var list))
-                return new List<XYZ>();
-
-            return list;
-        }
-    }
 
     [Transaction(TransactionMode.ReadOnly)]
     public class GenerateAndDisplaySurfacePointsCommand : IExternalCommand
