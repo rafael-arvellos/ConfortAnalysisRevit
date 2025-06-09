@@ -4,12 +4,12 @@ using Autodesk.Revit.Attributes;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text; // Para StringBuilder
-using Commands.SelectionUtils;
+using ConfortAnalysis.Commands;
 
 // Certifique-se que os namespaces de selectedPlanarFaceData e selectedElementData estão acessíveis
 // Exemplo: using ConfortAnalysis.Commands;
 
-namespace Commands.Debug
+namespace ConfortAnalysis.Commands
 {
     [Transaction(TransactionMode.Manual)] // Precisamos de transação para SetElementOverrides
     public class DebugSelectionInfoCommand : IExternalCommand

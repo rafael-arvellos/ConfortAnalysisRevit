@@ -4,7 +4,7 @@ using Autodesk.Revit.DB;
 using NetTopologySuite.Index.Strtree;
 using NetTopologySuite.Geometries;
 
-namespace SpatialAnalysis
+namespace ConfortAnalysis.Core.Spatial
 {
     public struct CellIndex
     {

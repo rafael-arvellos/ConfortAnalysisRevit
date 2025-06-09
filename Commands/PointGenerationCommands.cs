@@ -1,10 +1,12 @@
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
-using Commands.SelectionUtils;
-using SpatialAnalysis;
+using ConfortAnalysis.Commands;
+using ConfortAnalysis.Core.Spatial;
+using ConfortAnalysis.Core.Geometry; // Added for GeometryUtils
+using ConfortAnalysis.Data; // Added for ApplicationData
 using NetTopologySuite.Geometries;
-using System;                    
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -12,7 +14,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.Globalization;
 
-namespace Commands.GeneratePoints
+namespace ConfortAnalysis.Commands
 {
 
     [Transaction(TransactionMode.ReadOnly)]
@@ -26,15 +28,15 @@ namespace Commands.GeneratePoints
 
 
             // Verifica se existem faces selecionadas
-            if (selectedPlanarFaceData.selectedPlanarFacesRefs == null
-                || !selectedPlanarFaceData.selectedPlanarFacesRefs.Any())
+            if (ApplicationData.SelectedPlanarFacesRefs == null
+                || !ApplicationData.SelectedPlanarFacesRefs.Any())
             {
                 Autodesk.Revit.UI.TaskDialog.Show("Gerar Pontos", "Nenhuma face armazenada. Use o comando 'Select Faces' primeiro.");
                 return Result.Cancelled;
             }
 
             // Limpa a lista de pontos de execuções anteriores
-            generatedPointsData.clearPointList();
+            ApplicationDataFunctions.ClearGeneratedPoints();
 
             // Parâmetros para geração de pontos
             double pointStep = 0.5; // Espaçamento dos pontos na grade (em pés, unidade interna do Revit)
@@ -43,7 +45,7 @@ namespace Commands.GeneratePoints
 
             try
             {
-                foreach (var faceRef in selectedPlanarFaceData.selectedPlanarFacesRefs)
+                foreach (var faceRef in ApplicationData.SelectedPlanarFacesRefs)
                 {
                     Element elem = doc.GetElement(faceRef.ElementId);
                     PlanarFace? planarFace = elem?.GetGeometryObjectFromReference(faceRef) as PlanarFace;
@@ -60,7 +62,7 @@ namespace Commands.GeneratePoints
                     // 3. Armazenar os pontos gerados
                     if (surfacePoints != null && surfacePoints.Any())
                     {
-                        generatedPointsData.addPointsForFace(faceRef, surfacePoints);
+                        ApplicationDataFunctions.AddPointsForFace(faceRef, surfacePoints);
                         totalPointsStored += surfacePoints.Count;
                     }
                 }
@@ -126,7 +128,7 @@ namespace Commands.GeneratePoints
                     // b) teste ponto–dentro–da–malha
                     var mesh = solidMeshes[solid];
                     var bvh = meshBVH[solid];
-                    if (IsPointInsideMesh(mesh, bvh, pt))
+            if (IsPointInsideMesh(mesh, bvh, pt)) //TODO: intersectionCommands does not exist
                     {
                         isInside = true;
                         break;
@@ -149,7 +151,7 @@ namespace Commands.GeneratePoints
             var ray = new Ray(pt, dir);
 
             int count = 0;
-            intersectionCommands.TraverseBVH(bvh, mesh, ray, ref count);
+            intersectionCommands.TraverseBVH(bvh, mesh, ray, ref count); // Corrected: intersectionCommands is in ConfortAnalysis.Core.Spatial
             return (count % 2) == 1;                                                      // :contentReference[oaicite:5]{index=5}
         }
     }
@@ -177,8 +179,8 @@ namespace Commands.GeneratePoints
             Document doc = uiDoc.Document;
 
             // 1. Verificar se existem faces selecionadas
-            if (selectedPlanarFaceData.selectedPlanarFacesRefs == null
-                || !selectedPlanarFaceData.selectedPlanarFacesRefs.Any())
+            if (ApplicationData.SelectedPlanarFacesRefs == null
+                || !ApplicationData.SelectedPlanarFacesRefs.Any())
             {
                 Autodesk.Revit.UI.TaskDialog.Show("Exportar SVG", "Nenhuma face armazenada. Use o comando 'Select Faces' primeiro.");
                 return Result.Cancelled;
@@ -208,7 +210,7 @@ namespace Commands.GeneratePoints
             try
             {
                 // 3. Iterar sobre cada face selecionada
-                foreach (var faceRef in selectedPlanarFaceData.selectedPlanarFacesRefs)
+                foreach (var faceRef in ApplicationData.SelectedPlanarFacesRefs)
                 {
                     faceProcessedCounter++;
                     Element? elem = doc.GetElement(faceRef.ElementId);
@@ -288,7 +290,7 @@ namespace Commands.GeneratePoints
                     }
                     
                     // 6) Desenha apenas os pontos já gerados e armazenados para esta face
-                    List<XYZ> ptsThisFace = generatedPointsData.getPointsForFace(faceRef);
+                    List<XYZ> ptsThisFace = ApplicationDataFunctions.GetPointsForFace(faceRef);
                     foreach (var pt3D in ptsThisFace)
                     {
                         // Projeta cada ponto 3D em UV

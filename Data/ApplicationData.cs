@@ -6,7 +6,7 @@ namespace ConfortAnalysis.Data
     {
         public static List<Reference> SelectedPlanarFacesRefs { get; private set; } = new List<Reference>();
         public static List<Reference> SelectedElementsRefs { get; private set; } = new List<Reference>();
-        public static Dictionary<Reference, List<XYZ>> PointsPerFace { get; private set; } = new Dictionary<Reference, List<XYZ>>();
+        public static Dictionary<Reference, List<XYZ>> GeneratedPoints { get; private set; } = new Dictionary<Reference, List<XYZ>>();
             
     }
 
@@ -20,18 +20,24 @@ namespace ConfortAnalysis.Data
         {
             refsList.AddRange(refs);
         }
+
+        public static void ClearGeneratedPoints()
+        {
+            ApplicationData.GeneratedPoints.Clear();
+        }
+
         public static void AddPointsForFace(Reference faceRef, IEnumerable<XYZ> points)
         {
             if (faceRef == null || points == null) return;
-            if (!ApplicationData.PointsPerFace.ContainsKey(faceRef))
-                ApplicationData.PointsPerFace[faceRef] = new List<XYZ>();
+            if (!ApplicationData.GeneratedPoints.ContainsKey(faceRef))
+                ApplicationData.GeneratedPoints[faceRef] = new List<XYZ>();
 
-            ApplicationData.PointsPerFace[faceRef].AddRange(points);
+            ApplicationData.GeneratedPoints[faceRef].AddRange(points);
         }
-        public static List<XYZ> getPointsForFace(Reference faceRef)
+        public static List<XYZ> GetPointsForFace(Reference faceRef)
         {
             if (faceRef == null) return new List<XYZ>();
-            if (!ApplicationData.PointsPerFace.TryGetValue(faceRef, out var list))
+            if (!ApplicationData.GeneratedPoints.TryGetValue(faceRef, out var list))
                 return new List<XYZ>();
 
             return list;

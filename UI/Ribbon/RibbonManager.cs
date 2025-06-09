@@ -25,19 +25,19 @@ namespace ConfortAnalysis.Views
             string assemblyPath = Assembly.GetExecutingAssembly().Location;
 
             // 4) Botões principais
-            AddPushButton(panel, "SelectFaces", "Select Faces", assemblyPath, "Commands.SelectionUtils.SelectFacesCommand", "Resources/icons/select.png");
+            AddPushButton(panel, "SelectFaces", "Select Faces", assemblyPath, "ConfortAnalysis.Commands.SelectFacesCommand", "Resources/icons/select.png");
             AddSplitButtonsForCollection(panel,
                                          "Faces",
                                          "FaceIds",
                                          assemblyPath,
-                                         addCmd: "Commands.SelectFacesUtils.DestacarElementosCommand",
+                                         addCmd: "ConfortAnalysis.Commands.DestacarElementosCommand",
                                          removeCmd: "ConfortAnalysis.Commands.RemoveFaceIdCommand",
                                          addText: "Add FaceId",
                                          removeText: "Remove FaceId",
                                          addIcon: "Resources/icons/add.png",
                                          remIcon: "Resources/icons/remove.png");
 
-            AddPushButton(panel, "SelectGeoms", "Select Geometries", assemblyPath, "Commands.SelectionUtils.CaptureCurrentSelectionCommand", "Resources/icons/select.png");
+            AddPushButton(panel, "SelectGeoms", "Select Geometries", assemblyPath, "ConfortAnalysis.Commands.CaptureCurrentSelectionCommand", "Resources/icons/select.png");
             AddSplitButtonsForCollection(panel,
                                          "Geoms",
                                          "GeometryIds",
@@ -49,11 +49,11 @@ namespace ConfortAnalysis.Views
                                          addIcon: "Resources/icons/add.png",
                                          remIcon: "Resources/icons/remove.png");
 
-            AddPushButton(panel, "ConfigDirectSun", "Config.", assemblyPath, "Commands.Config.ConfigCommand", "Resources/icons/config.png");
+            AddPushButton(panel, "ConfigDirectSun", "Config.", assemblyPath, "ConfortAnalysis.Commands.ConfigCommand", "Resources/icons/config.png");
             AddPushButton(panel, "RunDirectSun", "Run", assemblyPath, "ConfortAnalysis.Commands.RunDirectSunHoursCommand", "Resources/icons/run.png");
-            AddPushButton(panel, "Debug", "Debug", assemblyPath, "Commands.Debug.DebugSelectionInfoCommand", "Resources/icons/debug.png");
-            AddPushButton(panel, "generatePoints", "generatePoints", assemblyPath, "Commands.GeneratePoints.GenerateAndDisplaySurfacePointsCommand", "Resources/icons/debug.png");
-            AddPushButton(panel, "export", "export", assemblyPath, "Commands.GeneratePoints.ExportFacePointsToSvgCommand",    "Resources/icons/debug.png");
+            AddPushButton(panel, "Debug", "Debug", assemblyPath, "ConfortAnalysis.Commands.DebugSelectionInfoCommand", "Resources/icons/debug.png");
+            AddPushButton(panel, "generatePoints", "generatePoints", assemblyPath, "ConfortAnalysis.Commands.GenerateAndDisplaySurfacePointsCommand", "Resources/icons/debug.png");
+            AddPushButton(panel, "export", "export", assemblyPath, "ConfortAnalysis.Commands.ExportFacePointsToSvgCommand",    "Resources/icons/debug.png");
         }
         
         private static void AddPushButton(RibbonPanel panel,
